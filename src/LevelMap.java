@@ -1,5 +1,9 @@
+import org.stringtree.json.JSONReader;
+import org.stringtree.json.JSONWriter;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.MouseAdapter;
@@ -11,13 +15,13 @@ import java.awt.event.MouseMotionAdapter;
  */
 public class LevelMap extends JPanel {
 
-    private List<List<Long>> shapes = new ArrayList<>();
-    private int cellSize = 30,
-            width = 20,
+    public int cellSize = 30;
+    private int width = 40,
             height = 20,
             mouseX, mouseY,
             startX, startY,
             endX, endY;
+    private boolean mousePressed = false;
 
     private MainFrame frame;
 
@@ -25,6 +29,8 @@ public class LevelMap extends JPanel {
         super();
 
         frame = f;
+
+        setPreferredSize(new Dimension(width * cellSize, height * cellSize));
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -51,10 +57,12 @@ public class LevelMap extends JPanel {
                 super.mousePressed(e);
                 startX = e.getX();
                 startY = e.getY();
+                mousePressed = true;
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                mousePressed = false;
                 super.mouseReleased(e);
                 endX = e.getX();
                 endY = e.getY();
@@ -68,30 +76,54 @@ public class LevelMap extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // fill background
-        g.setColor(Color.lightGray);
-        g.fillRect(0, 0, width * cellSize, height * cellSize);
+        Graphics2D g2 = (Graphics2D) g;
 
-        // draw shapes, enemies, etc.
-        g.setColor(Color.green);
-        for (List<Long> s : shapes) {
-            g.fillRect(
+        // fill background
+        if (frame.cover == null) {
+            g2.setColor(Color.lightGray);
+            g2.fillRect(0, 0, width * cellSize, height * cellSize);
+        } else {
+            g2.drawImage(frame.cover, 0, 0, null);
+        }
+
+        int i;
+
+        // draw shapes
+        for (i = 0; i < frame.shapes.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) frame.shapes.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            List<Long> s = (List<Long>)reader.read(el);
+
+            g2.setColor(Color.green);
+            g2.fillRect(
                     s.get(0).intValue() * cellSize,
                     (s.get(1).intValue() - 1) * cellSize,
                     (s.get(2).intValue() - s.get(0).intValue()) * cellSize,
                     (s.get(3).intValue() - s.get(1).intValue() + 1) * cellSize
             );
+
+            if (frame.shapes.getSelectedIndex() == i) {
+                g2.setColor(Color.red);
+                g2.setStroke(new BasicStroke(5.0f));
+                g2.drawRect(
+                        s.get(0).intValue() * cellSize,
+                        (s.get(1).intValue() - 1) * cellSize,
+                        (s.get(2).intValue() - s.get(0).intValue()) * cellSize,
+                        (s.get(3).intValue() - s.get(1).intValue() + 1) * cellSize
+                );
+                g2.setStroke(new BasicStroke(1.0f));
+            }
         }
 
         // draw grid
         g.setColor(Color.black);
-        int i;
+
         for (i = 0; i <= width; i++) {
-            g.drawLine(0, i * cellSize, width * cellSize, i * cellSize);
+            g.drawLine(i * cellSize, 0, i * cellSize, height * cellSize);
         }
 
         for (i = 0; i <= height; i++) {
-            g.drawLine(i * cellSize, 0, i * cellSize, height * cellSize);
+            g.drawLine(0, i * cellSize, width * cellSize, i * cellSize);
         }
 
         // fill cell under mouse in color
@@ -105,9 +137,17 @@ public class LevelMap extends JPanel {
         }
 
         // coordinate
-        int[] c = new int[]{mouseX - mouseX % cellSize, mouseY - mouseY % cellSize};
-        g.fillRect(c[0], c[1], cellSize, cellSize);
-        frame.setCoordinates(c[0] / cellSize, c[1] / cellSize);
+        int[] c;
+        if (mousePressed) {
+            c = new int[]{startX - startX % cellSize, startY - startY % cellSize};
+            g.fillRect(c[0], c[1], cellSize * (1 + (mouseX - startX) / cellSize), cellSize * (1 + (mouseY - startY) / cellSize));
+            frame.setCoordinates(1 + (mouseX - startX) / cellSize, 1 + (mouseY - startY) / cellSize);
+        } else {
+            c = new int[]{mouseX - mouseX % cellSize, mouseY - mouseY % cellSize};
+            g.fillRect(c[0], c[1], cellSize, cellSize);
+            frame.setCoordinates(c[0] / cellSize, c[1] / cellSize);
+        }
+
     }
 
     public void completeObject() {
@@ -115,18 +155,26 @@ public class LevelMap extends JPanel {
             case MainFrame.MODE_NONE :
                 return;
             case MainFrame.MODE_SHAPE:
+                if (startX / cellSize > endX / cellSize || startY / cellSize > endY / cellSize) return;
                 List<Long> l = new ArrayList<Long>();
                 l.add((long) startX / cellSize);
                 l.add((long) startY / cellSize + 1);
                 l.add((long) endX / cellSize + 1);
                 l.add((long) endY / cellSize + 1);
-                shapes.add(l);
+                JSONWriter writer = new JSONWriter();
+                ((DefaultListModel) frame.shapes.getModel()).addElement(writer.write(l));
 //                System.out.println(shapes);
                 break;
         }
     }
 
-    public List getShapes() {
-        return shapes;
+    public void setWidth(int widthPx) {
+        width = widthPx / cellSize;
+        setPreferredSize(new Dimension(width * cellSize, height * cellSize));
+    }
+
+    public void setHeight(int heightPx) {
+        height = heightPx / cellSize;
+        setPreferredSize(new Dimension(width * cellSize, height * cellSize));
     }
 }

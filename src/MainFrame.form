@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="contentPane" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="1000" height="592"/>
+      <xy x="20" y="20" width="1052" height="592"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -15,19 +15,10 @@
           </grid>
         </constraints>
         <properties>
-          <dividerLocation value="670"/>
+          <dividerLocation value="800"/>
         </properties>
         <border type="none"/>
         <children>
-          <grid id="b2462" binding="levelPanel" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
-            <constraints>
-              <splitpane position="left"/>
-            </constraints>
-            <properties/>
-            <border type="none"/>
-            <children/>
-          </grid>
           <grid id="26bbc" binding="settingsPanel" custom-create="true" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
@@ -83,7 +74,7 @@
                     <border type="none"/>
                     <children/>
                   </grid>
-                  <grid id="38088" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="38088" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <tabbedpane title="Shapes"/>
@@ -91,7 +82,7 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <component id="ca80d" class="javax.swing.JList" binding="shapesList" custom-create="true">
+                      <component id="ca80d" class="javax.swing.JList" binding="shapes" custom-create="true">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="2" anchor="0" fill="3" indent="0" use-parent-layout="false">
                             <preferred-size width="150" height="50"/>
@@ -101,17 +92,25 @@
                       </component>
                       <component id="44b82" class="javax.swing.JCheckBox" binding="createShapesModeCheckBox" default-binding="true">
                         <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text value="Create Shapes Mode"/>
+                        </properties>
+                      </component>
+                      <component id="751fd" class="javax.swing.JButton" binding="deleteShapeButton" custom-create="true" default-binding="true">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Delete Shape"/>
                         </properties>
                       </component>
                     </children>
                   </grid>
                 </children>
               </tabbedpane>
-              <component id="a6168" class="javax.swing.JButton" binding="uploadCover">
+              <component id="a6168" class="javax.swing.JButton" binding="uploadCover" custom-create="true">
                 <constraints>
                   <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -121,6 +120,17 @@
               </component>
             </children>
           </grid>
+          <scrollpane id="5e257" binding="levelMapScrollArea" custom-create="true">
+            <constraints>
+              <splitpane position="left"/>
+            </constraints>
+            <properties>
+              <horizontalScrollBarPolicy value="32"/>
+              <verticalScrollBarPolicy value="22"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </scrollpane>
         </children>
       </splitpane>
     </children>
