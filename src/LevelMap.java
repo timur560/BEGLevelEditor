@@ -104,12 +104,39 @@ public class LevelMap extends JPanel {
 
             if (frame.shapes.getSelectedIndex() == i) {
                 g2.setColor(Color.red);
-                g2.setStroke(new BasicStroke(5.0f));
+                g2.setStroke(new BasicStroke(4.0f));
                 g2.drawRect(
                         s.get(0).intValue() * cellSize,
                         (s.get(1).intValue() - 1) * cellSize,
                         (s.get(2).intValue() - s.get(0).intValue()) * cellSize,
                         (s.get(3).intValue() - s.get(1).intValue() + 1) * cellSize
+                );
+                g2.setStroke(new BasicStroke(1.0f));
+            }
+        }
+
+        // draw ladders
+        for (i = 0; i < frame.ladders.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) frame.ladders.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            List<Long> s = (List<Long>)reader.read(el);
+
+            g2.setColor(Color.yellow);
+            g2.fillRect(
+                    s.get(0).intValue() * cellSize,
+                    (s.get(1).intValue()) * cellSize,
+                    cellSize,
+                    (s.get(2).intValue()) * cellSize
+            );
+
+            if (frame.ladders.getSelectedIndex() == i) {
+                g2.setColor(Color.red);
+                g2.setStroke(new BasicStroke(4.0f));
+                g2.drawRect(
+                        s.get(0).intValue() * cellSize,
+                        (s.get(1).intValue()) * cellSize,
+                        cellSize,
+                        (s.get(2).intValue()) * cellSize
                 );
                 g2.setStroke(new BasicStroke(1.0f));
             }
@@ -127,9 +154,12 @@ public class LevelMap extends JPanel {
         }
 
         // fill cell under mouse in color
-        switch (frame.getMode()) {
+        switch (frame.mode) {
             case MainFrame.MODE_SHAPE:
                 g.setColor(Color.green);
+                break;
+            case MainFrame.MODE_LADDER:
+                g.setColor(Color.yellow);
                 break;
             default:
                 g.setColor(Color.gray);
@@ -151,19 +181,29 @@ public class LevelMap extends JPanel {
     }
 
     public void completeObject() {
-        switch (frame.getMode()) {
+        JSONWriter writer = new JSONWriter();
+        List<Long> l = new ArrayList<Long>();
+        switch (frame.mode) {
             case MainFrame.MODE_NONE :
                 return;
+
             case MainFrame.MODE_SHAPE:
                 if (startX / cellSize > endX / cellSize || startY / cellSize > endY / cellSize) return;
-                List<Long> l = new ArrayList<Long>();
                 l.add((long) startX / cellSize);
                 l.add((long) startY / cellSize + 1);
                 l.add((long) endX / cellSize + 1);
                 l.add((long) endY / cellSize + 1);
-                JSONWriter writer = new JSONWriter();
                 ((DefaultListModel) frame.shapes.getModel()).addElement(writer.write(l));
-//                System.out.println(shapes);
+                frame.mode = MainFrame.MODE_NONE;
+                break;
+
+            case MainFrame.MODE_LADDER:
+                if (startX / cellSize > endX / cellSize || startY / cellSize > endY / cellSize) return;
+                l.add((long) startX / cellSize);
+                l.add((long) startY / cellSize);
+                l.add((long) endY / cellSize - startY / cellSize + 1);
+                ((DefaultListModel) frame.ladders.getModel()).addElement(writer.write(l));
+                frame.mode = MainFrame.MODE_NONE;
                 break;
         }
     }
