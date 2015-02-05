@@ -17,12 +17,14 @@ public class MainFrame extends JFrame {
     public static final int MODE_NONE = 0;
     public static final int MODE_SHAPE = 1;
     public static final int MODE_LADDER = 2;
+    public static final int MODE_ENEMY = 3;
+    public static final int MODE_MP = 4;
 
     public int mode = MODE_NONE;
 
     public JPanel contentPane;
 
-    private JButton toJson;
+    private JButton saveButton;
     private LevelMap levelPanel;
     private JPanel settingsPanel;
     private JTabbedPane tabbedPane1;
@@ -32,15 +34,38 @@ public class MainFrame extends JFrame {
     private JScrollPane levelMapScrollArea;
     private JButton deleteShapeButton;
 
-    public JList shapes,
-            ladders;
-    public DefaultListModel shapesListModel, laddersListModel;
+    public JList shapes;
+    public JList ladders;
     private JComboBox tilesetCombo;
     private JComboBox effectCombo;
     private JButton resetMode;
     private JButton createShapeButton;
     private JButton createLadderButton;
     private JButton deleteLadderButton;
+    private JButton completeObjectButton;
+
+    // enemy tab
+    public JList enemies;
+    private JButton createEnemyButton;
+    private JButton deleteEnemyButton;
+    public JCheckBox enemyCanDie;
+    public JCheckBox enemyWeapon;
+    public JTextField enemyWidth;
+    public JTextField enemyHeight;
+    public JTextField enemyLeft;
+    public JTextField enemyTop;
+    public JTextField enemySpeed;
+    public JTextField enemyShootDelay;
+    public JComboBox enemyType;
+    public JComboBox enemyDirection;
+
+    // moving platforms tab
+    public JTextField mpWidth;
+    public JTextField mpSpeed;
+    public JButton createMovingPlatformButton;
+    public JButton deleteMovingPlatformButton;
+    public JList mp;
+    private JList movingBlocks;
 
     public BufferedImage cover, coverFull;
 
@@ -48,7 +73,7 @@ public class MainFrame extends JFrame {
         levelPanel = new LevelMap(this);
         levelMapScrollArea = new JScrollPane(levelPanel);
         settingsPanel = new JPanel();
-        toJson = new JButton("Get JSON");
+        saveButton = new JButton("Get JSON");
 
         // upload cover image
         uploadCover = new JButton("Upload Cover");
@@ -94,17 +119,25 @@ public class MainFrame extends JFrame {
         resetMode.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mode = MainFrame.MODE_NONE;
+                changeMode(MainFrame.MODE_NONE);
             }
         });
+
+        completeObjectButton = new JButton();
+        completeObjectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                levelPanel.completeObject();
+            }
+        });
+
 
         /**********************************************
          *                  SHAPES
          **********************************************/
 
         // list
-        shapesListModel = new DefaultListModel();
-        shapes = new JList(shapesListModel);
+        shapes = new JList(new DefaultListModel());
         shapes.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -117,7 +150,7 @@ public class MainFrame extends JFrame {
         createShapeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mode = MainFrame.MODE_SHAPE;
+                changeMode(MainFrame.MODE_SHAPE);
             }
         });
 
@@ -136,8 +169,7 @@ public class MainFrame extends JFrame {
          **********************************************/
 
         // list
-        laddersListModel = new DefaultListModel();
-        ladders = new JList(laddersListModel);
+        ladders = new JList(new DefaultListModel());
         ladders.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -150,7 +182,7 @@ public class MainFrame extends JFrame {
         createLadderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                mode = MainFrame.MODE_LADDER;
+                changeMode(MainFrame.MODE_LADDER);
             }
         });
 
@@ -164,10 +196,104 @@ public class MainFrame extends JFrame {
             }
         });
 
+        /**********************************************
+         *                 ENEMIES
+         **********************************************/
+
+        // list
+        enemies = new JList(new DefaultListModel());
+        enemies.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                levelPanel.repaint();
+            }
+        });
+
+        // create mode
+        createEnemyButton = new JButton();
+        createEnemyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeMode(MainFrame.MODE_ENEMY);
+            }
+        });
+
+        // delete
+        deleteEnemyButton = new JButton();
+        deleteEnemyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((DefaultListModel) enemies.getModel()).remove(enemies.getSelectedIndex());
+                levelPanel.repaint();
+            }
+        });
+
+        // change type
+        enemyType = new JComboBox();
+        enemyType.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (enemyType.getModel().getSelectedItem().toString().equals("snowman")) {
+                    enemyWidth.setText("0.6");
+                    enemyHeight.setText("1.0");
+                    enemyLeft.setText("0.0");
+                    enemyTop.setText("0.0");
+                } else if (enemyType.getModel().getSelectedItem().toString().equals("snowflake")) {
+                    enemyWidth.setText("1.0");
+                    enemyHeight.setText("1.0");
+                    enemyLeft.setText("0.0");
+                    enemyTop.setText("0.0");
+                }
+            }
+        });
+
+        /**********************************************
+         *                 MOVING PLATFORMS
+         **********************************************/
+
+        // list
+        mp = new JList(new DefaultListModel());
+        mp.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                levelPanel.repaint();
+            }
+        });
+
+        // create mode
+        createMovingPlatformButton = new JButton();
+        createMovingPlatformButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeMode(MainFrame.MODE_MP);
+            }
+        });
+
+        // delete
+        deleteMovingPlatformButton = new JButton();
+        deleteMovingPlatformButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((DefaultListModel) mp.getModel()).remove(mp.getSelectedIndex());
+                levelPanel.repaint();
+            }
+        });
+
+        /**********************************************
+         *                 MOVING BLOCKS
+         **********************************************/
+
+        movingBlocks = new JList(new DefaultListModel());
     }
 
     public void setCoordinates(int x, int y) {
         coordinatesLabel.setText(x + ":" + y);
     }
 
+    public void changeMode(int m) {
+        levelPanel.x.clear();
+        levelPanel.y.clear();
+        mode = m;
+        levelPanel.repaint();
+    }
 }

@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created by timur on 03.02.15.
@@ -8,7 +9,8 @@ public class BEGLevelEditor {
         JFrame frame = new JFrame("MainFrame");
         frame.setContentPane(new MainFrame().contentPane);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1200, 700);
+        Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+        frame.setSize(size.width, size.height - 20);
         frame.setVisible(true);
     }
 
