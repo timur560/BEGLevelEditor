@@ -10,7 +10,8 @@ public class BEGLevelEditor {
         frame.setContentPane(new MainFrame().contentPane);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
-        frame.setSize(size.width, size.height - 20);
+        // frame.setSize(size.width, size.height - 20);
+        frame.setSize(1300, size.height - 20);
         frame.setVisible(true);
     }
 

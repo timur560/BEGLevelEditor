@@ -1,14 +1,18 @@
+import org.stringtree.json.JSONReader;
+import org.stringtree.json.JSONWriter;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 /**
  * Created by timur on 03.02.15.
@@ -19,12 +23,15 @@ public class MainFrame extends JFrame {
     public static final int MODE_LADDER = 2;
     public static final int MODE_ENEMY = 3;
     public static final int MODE_MP = 4;
+    public static final int MODE_MB = 5;
+    public static final int MODE_HEART = 6;
+    public static final int MODE_PORTAL = 7;
 
     public int mode = MODE_NONE;
 
     public JPanel contentPane;
 
-    private JButton saveButton;
+    private JButton saveAsButton;
     private LevelMap levelPanel;
     private JPanel settingsPanel;
     private JTabbedPane tabbedPane1;
@@ -62,10 +69,31 @@ public class MainFrame extends JFrame {
     // moving platforms tab
     public JTextField mpWidth;
     public JTextField mpSpeed;
-    public JButton createMovingPlatformButton;
-    public JButton deleteMovingPlatformButton;
+    private JButton createMovingPlatformButton;
+    private JButton deleteMovingPlatformButton;
     public JList mp;
-    private JList movingBlocks;
+
+    // moving blocks tab
+    public JList movingBlocks;
+    private JButton createMovableBlockButton;
+    private JButton deleteMovableBlockButton;
+
+    // hearts tab
+    public JList hearts;
+    private JButton startCreatingHeartButton;
+    private JButton deleteHeartButton;
+    public JComboBox secret;
+    public JCheckBox fakeCheckBox;
+
+    // portal tab
+    public JList portals;
+    public JTextField level;
+    public JTextField zone;
+    public JTextField portal;
+    private JButton startCreatingPortalButton;
+    private JButton deletePortalButton;
+    private JTextField fileTextField;
+    private JButton saveButton;
 
     public BufferedImage cover, coverFull;
 
@@ -73,7 +101,7 @@ public class MainFrame extends JFrame {
         levelPanel = new LevelMap(this);
         levelMapScrollArea = new JScrollPane(levelPanel);
         settingsPanel = new JPanel();
-        saveButton = new JButton("Get JSON");
+        saveAsButton = new JButton("Get JSON");
 
         // upload cover image
         uploadCover = new JButton("Upload Cover");
@@ -131,6 +159,28 @@ public class MainFrame extends JFrame {
             }
         });
 
+        saveAsButton = new JButton();
+        saveAsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+                if (fc.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+                    fileTextField.setText(fc.getSelectedFile().getPath());
+                    File f = fc.getSelectedFile();
+                    try {
+                        PrintWriter writer = new PrintWriter(f, "UTF-8");
+                        writer.print(getJson());
+                        writer.close();
+                    } catch (FileNotFoundException e1) {
+                        e1.printStackTrace();
+                    } catch (UnsupportedEncodingException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        saveButton = new JButton();
 
         /**********************************************
          *                  SHAPES
@@ -283,7 +333,175 @@ public class MainFrame extends JFrame {
          *                 MOVING BLOCKS
          **********************************************/
 
+        // list
         movingBlocks = new JList(new DefaultListModel());
+        movingBlocks.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                levelPanel.repaint();
+            }
+        });
+
+        // create mode
+        createMovableBlockButton = new JButton();
+        createMovableBlockButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeMode(MainFrame.MODE_MB);
+            }
+        });
+
+        // delete
+        deleteMovableBlockButton = new JButton();
+        deleteMovableBlockButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((DefaultListModel) movingBlocks.getModel()).remove(movingBlocks.getSelectedIndex());
+                levelPanel.repaint();
+            }
+        });
+
+
+        /**********************************************
+         *                 HEARTS
+         **********************************************/
+
+        // list
+        hearts = new JList(new DefaultListModel());
+        hearts.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                levelPanel.repaint();
+            }
+        });
+
+        // create mode
+        startCreatingHeartButton = new JButton();
+        startCreatingHeartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeMode(MainFrame.MODE_HEART);
+            }
+        });
+
+        // delete
+        deleteHeartButton = new JButton();
+        deleteHeartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((DefaultListModel) hearts.getModel()).remove(hearts.getSelectedIndex());
+                levelPanel.repaint();
+            }
+        });
+
+        /**********************************************
+         *                 PORTALS
+         **********************************************/
+
+        // list
+        portals = new JList(new DefaultListModel());
+        portals.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                levelPanel.repaint();
+            }
+        });
+
+        // create mode
+        startCreatingPortalButton = new JButton();
+        startCreatingPortalButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeMode(MainFrame.MODE_PORTAL);
+            }
+        });
+
+        // delete
+        deletePortalButton = new JButton();
+        deletePortalButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((DefaultListModel) portals.getModel()).remove(portals.getSelectedIndex());
+                levelPanel.repaint();
+            }
+        });
+    }
+
+    private String getJson() {
+        Map<String, Object> result = new HashMap<>();
+
+        result.put("width", levelPanel.width);
+        result.put("height", levelPanel.height);
+        result.put("effect", effectCombo.getSelectedItem().toString());
+        result.put("tileset", Long.valueOf(tilesetCombo.getSelectedItem().toString()));
+
+        int i;
+        List s = new ArrayList();
+
+        // shapes
+        for (i = 0; i < shapes.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) shapes.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((List<Long>) reader.read(el));
+        }
+        result.put("shapes", ((ArrayList) s).clone());
+
+        // ladders
+        s.clear();
+        for (i = 0; i < ladders.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) ladders.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((List<Long>) reader.read(el));
+        }
+        result.put("ladders", ((ArrayList) s).clone());
+
+        // enemies
+        s.clear();
+        for (i = 0; i < enemies.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) enemies.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((Map) reader.read(el));
+        }
+        result.put("enemies", ((ArrayList) s).clone());
+
+        // moving platforms
+        s.clear();
+        for (i = 0; i < mp.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) mp.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((Map) reader.read(el));
+        }
+        result.put("movingPlatforms", ((ArrayList) s).clone());
+
+        // moving blocks
+        s.clear();
+        for (i = 0; i < movingBlocks.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) movingBlocks.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((List<Long>) reader.read(el));
+        }
+        result.put("movingBlocks", ((ArrayList) s).clone());
+
+        // hearts
+        s.clear();
+        for (i = 0; i < hearts.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) hearts.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((Map) reader.read(el));
+        }
+        result.put("hearts", ((ArrayList) s).clone());
+
+        // portals
+        s.clear();
+        for (i = 0; i < portals.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) portals.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((Map) reader.read(el));
+        }
+        result.put("portals", ((ArrayList) s).clone());
+
+        JSONWriter writer = new JSONWriter();
+        return writer.write(result);
     }
 
     public void setCoordinates(int x, int y) {
