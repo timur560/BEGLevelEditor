@@ -233,7 +233,7 @@ public class LevelMap extends JPanel {
             g2.setColor(Color.blue);
             g2.fillRect(
                     s.get(0).intValue() * cellSize,
-                    (s.get(1).intValue() - 1) * cellSize,
+                    (s.get(1).intValue()) * cellSize,
                     cellSize, cellSize
             );
 
@@ -242,7 +242,7 @@ public class LevelMap extends JPanel {
                 g2.setStroke(new BasicStroke(4.0f));
                 g2.drawRect(
                         s.get(0).intValue() * cellSize,
-                        (s.get(1).intValue() - 1) * cellSize,
+                        (s.get(1).intValue()) * cellSize,
                         cellSize, cellSize
                 );
                 g2.setStroke(new BasicStroke(1.0f));
@@ -475,7 +475,7 @@ public class LevelMap extends JPanel {
                 i = 0;
                 for (long xt : x) {
                     ((DefaultListModel) frame.movingBlocks.getModel()).addElement(writer.write(
-                            Arrays.asList(xt / cellSize, y.get(i).longValue() / cellSize + 1)
+                            Arrays.asList(xt / cellSize, y.get(i).longValue() / cellSize)
                     ));
                     i++;
                 }
