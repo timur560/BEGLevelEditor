@@ -137,15 +137,15 @@ public class LevelMap extends JPanel {
                 if (j >= path.size()) j = 0;
                 g2.drawLine(
                         point.get(0).intValue() * cellSize + cellSize / 2 - 2,
-                        (point.get(1).intValue() - 1) * cellSize + cellSize / 2 - 2,
+                        (point.get(1).intValue()) * cellSize + cellSize / 2 - 2,
                         path.get(j).get(0).intValue() * cellSize + cellSize / 2 - 2,
-                        (path.get(j).get(1).intValue() - 1) * cellSize + cellSize / 2 - 2
+                        (path.get(j).get(1).intValue()) * cellSize + cellSize / 2 - 2
                 );
             }
 
             g2.fillRect(
                     path.get(0).get(0).intValue() * cellSize + (int) (((List<Double>) e.get("rect")).get(2).floatValue() * cellSize),
-                    (path.get(0).get(1).intValue() - 1) * cellSize + (int) (((List<Double>) e.get("rect")).get(3).floatValue() * cellSize),
+                    (path.get(0).get(1).intValue()) * cellSize + (int) (((List<Double>) e.get("rect")).get(3).floatValue() * cellSize),
                     (int) (cellSize * ((List<Double>) e.get("rect")).get(0).floatValue()),
                     (int) (cellSize * ((List<Double>) e.get("rect")).get(1).floatValue())
             );
@@ -155,7 +155,7 @@ public class LevelMap extends JPanel {
                 g2.setStroke(new BasicStroke(4.0f));
                 g2.drawRect(
                         path.get(0).get(0).intValue() * cellSize,
-                        (path.get(0).get(1).intValue() - 1) * cellSize,
+                        (path.get(0).get(1).intValue()) * cellSize,
                         cellSize, cellSize
                 );
             }
@@ -407,7 +407,7 @@ public class LevelMap extends JPanel {
                 // path
                 i = 0;
                 for (int x : this.x) {
-                    path.add(Arrays.asList((long) x / cellSize, (long) y.get(i) / cellSize + 1));
+                    path.add(Arrays.asList((long) x / cellSize, (long) y.get(i) / cellSize));
                     i++;
                 }
                 enemy.put("path", path);
