@@ -7,6 +7,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -94,6 +96,8 @@ public class MainFrame extends JFrame {
     private JButton deletePortalButton;
     private JTextField fileTextField;
     private JButton saveButton;
+    private JTextField coverFileTextField;
+    private JButton reloadCoverButton;
 
     public BufferedImage cover, coverFull;
 
@@ -113,8 +117,9 @@ public class MainFrame extends JFrame {
                 int returnVal = fc.showOpenDialog(MainFrame.this);
 
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    coverFileTextField.setText(file.getAbsolutePath());
                     try {
-                        File file = fc.getSelectedFile();
                         coverFull = ImageIO.read(file);
 
                         cover = new BufferedImage(
@@ -140,6 +145,38 @@ public class MainFrame extends JFrame {
                 }
             }
 
+        });
+
+        // reload cover
+        reloadCoverButton = new JButton();
+        reloadCoverButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                File file = new File(coverFileTextField.getText());
+                coverFileTextField.setText(file.getAbsolutePath());
+                try {
+                    coverFull = ImageIO.read(file);
+
+                    cover = new BufferedImage(
+                            coverFull.getWidth() / 50 * levelPanel.cellSize,
+                            coverFull.getHeight() / 50 * levelPanel.cellSize,
+                            BufferedImage.TYPE_INT_RGB
+                    );
+                    Graphics g = cover.createGraphics();
+                    g.drawImage(coverFull, 0, 0,
+                            coverFull.getWidth() / 50 * levelPanel.cellSize,
+                            coverFull.getHeight() / 50 * levelPanel.cellSize,
+                            null);
+                    g.dispose();
+
+                    levelPanel.setWidth(cover.getWidth());
+                    levelPanel.setHeight(cover.getHeight());
+                    levelPanel.repaint();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
+            }
         });
 
         // reset mode
@@ -181,6 +218,30 @@ public class MainFrame extends JFrame {
         });
 
         saveButton = new JButton();
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fileTextField.getText().equals("") || JOptionPane.showConfirmDialog(MainFrame.this,
+                        "Overwrite target?",
+                        "Confirm",
+                        JOptionPane.QUESTION_MESSAGE,
+                        JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                    return;
+                }
+
+                File f = new File(fileTextField.getText());
+
+                try {
+                    PrintWriter writer = new PrintWriter(f, "UTF-8");
+                    writer.print(getJson());
+                    writer.close();
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                } catch (UnsupportedEncodingException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
 
         /**********************************************
          *                  SHAPES

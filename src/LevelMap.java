@@ -3,10 +3,8 @@ import org.stringtree.json.JSONWriter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 /**
@@ -28,6 +26,7 @@ public class LevelMap extends JPanel {
         frame = f;
 
         setPreferredSize(new Dimension(width * cellSize, height * cellSize));
+        setFocusable(true);
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -44,11 +43,30 @@ public class LevelMap extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                x.add(e.getX());
-                y.add(e.getY());
+                LevelMap.this.grabFocus();
+                if (frame.mode != MainFrame.MODE_NONE) {
+                    x.add(e.getX());
+                    y.add(e.getY());
+                }
             }
         });
 
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyChar() == 'c') {
+                    completeObject();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
     }
 
     @Override
