@@ -139,6 +139,38 @@ public class LevelMap extends JPanel {
             }
         }
 
+        // draw d. platforms
+        for (i = 0; i < frame.dp.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) frame.dp.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            List<Long> s = (List<Long>)reader.read(el);
+
+            g2.setColor(Color.green);
+            g2.fillRect(
+                    s.get(0).intValue() * cellSize,
+                    (s.get(1).intValue()) * cellSize,
+                    (s.get(2).intValue()) * cellSize,
+                    cellSize
+            );
+
+            g2.setColor(Color.black);
+            g2.drawString("DP",
+                    s.get(0).intValue() * cellSize + 2,
+                    (s.get(1).intValue() + 1) * cellSize);
+
+            if (frame.dp.getSelectedIndex() == i) {
+                g2.setColor(Color.red);
+                g2.setStroke(new BasicStroke(4.0f));
+                g2.drawRect(
+                        s.get(0).intValue() * cellSize,
+                        (s.get(1).intValue()) * cellSize,
+                        (s.get(2).intValue()) * cellSize,
+                        cellSize
+                );
+                g2.setStroke(new BasicStroke(1.0f));
+            }
+        }
+
         // draw enemies
         for (i = 0; i < frame.enemies.getModel().getSize(); i++) {
             String el = ((DefaultListModel) frame.enemies.getModel()).get(i).toString();
@@ -361,6 +393,7 @@ public class LevelMap extends JPanel {
         switch (frame.mode) {
             case MainFrame.MODE_SHAPE:
             case MainFrame.MODE_MP:
+            case MainFrame.MODE_DP:
                 g.setColor(Color.green);
                 break;
             case MainFrame.MODE_LADDER:
@@ -468,7 +501,14 @@ public class LevelMap extends JPanel {
                 mp.put("speed", Double.valueOf(frame.mpSpeed.getText()));
 
                 ((DefaultListModel) frame.mp.getModel()).addElement(writer.write(mp));
+                break;
 
+            case MainFrame.MODE_DP:
+                l.add((long) x.get(0) / cellSize);
+                l.add((long) y.get(0) / cellSize);
+                l.add((long) x.get(1) / cellSize - (long) x.get(0) / cellSize + 1);
+
+                ((DefaultListModel) frame.dp.getModel()).addElement(writer.write(l));
                 break;
 
             case MainFrame.MODE_MB:

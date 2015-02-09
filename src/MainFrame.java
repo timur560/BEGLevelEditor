@@ -28,6 +28,7 @@ public class MainFrame extends JFrame {
     public static final int MODE_MB = 5;
     public static final int MODE_HEART = 6;
     public static final int MODE_PORTAL = 7;
+    public static final int MODE_DP = 8;
 
     public int mode = MODE_NONE;
 
@@ -94,6 +95,12 @@ public class MainFrame extends JFrame {
     public JTextField portal;
     private JButton startCreatingPortalButton;
     private JButton deletePortalButton;
+
+    // disappearing platform
+    private JButton startCreatingDPlatformButton;
+    private JButton deleteDPlatformButton;
+    public JList dp;
+
     private JTextField fileTextField;
     private JButton saveButton;
     private JTextField coverFileTextField;
@@ -221,11 +228,11 @@ public class MainFrame extends JFrame {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (fileTextField.getText().equals("") || JOptionPane.showConfirmDialog(MainFrame.this,
+                if (fileTextField.getText().equals("") || JOptionPane.showConfirmDialog( MainFrame.this,
                         "Overwrite target?",
                         "Confirm",
-                        JOptionPane.QUESTION_MESSAGE,
-                        JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.NO_OPTION) {
                     return;
                 }
 
@@ -391,6 +398,38 @@ public class MainFrame extends JFrame {
         });
 
         /**********************************************
+         *            DISAPPEARING PLATFORMS
+         **********************************************/
+
+        // list
+        dp = new JList(new DefaultListModel());
+        dp.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                levelPanel.repaint();
+            }
+        });
+
+        // create mode
+        startCreatingDPlatformButton = new JButton();
+        startCreatingDPlatformButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeMode(MainFrame.MODE_DP);
+            }
+        });
+
+        // delete
+        deleteDPlatformButton = new JButton();
+        deleteDPlatformButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((DefaultListModel) dp.getModel()).remove(dp.getSelectedIndex());
+                levelPanel.repaint();
+            }
+        });
+
+        /**********************************************
          *                 MOVING BLOCKS
          **********************************************/
 
@@ -515,6 +554,15 @@ public class MainFrame extends JFrame {
             s.add((List<Long>) reader.read(el));
         }
         result.put("ladders", ((ArrayList) s).clone());
+
+        // disappearing platforms
+        s.clear();
+        for (i = 0; i < dp.getModel().getSize(); i++) {
+            String el = ((DefaultListModel) dp.getModel()).get(i).toString();
+            JSONReader reader = new JSONReader();
+            s.add((List<Long>) reader.read(el));
+        }
+        result.put("disappearingPlatforms", ((ArrayList) s).clone());
 
         // enemies
         s.clear();
